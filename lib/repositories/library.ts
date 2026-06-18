@@ -1,4 +1,4 @@
-import type { LibraryItemType, PrismaClient } from "@prisma/client";
+import type { LibraryItemType, Prisma, PrismaClient } from "@prisma/client";
 
 export async function listLibraryItems(prisma: PrismaClient, roomId: string) {
   return prisma.libraryItem.findMany({
@@ -14,7 +14,7 @@ export async function createLibraryItem(
     type: LibraryItemType;
     title: string;
     description?: string;
-    metadataJson?: Record<string, unknown>;
+    metadataJson?: Prisma.InputJsonValue;
     coverAssetId?: string;
   }
 ) {

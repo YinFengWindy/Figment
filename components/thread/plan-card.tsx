@@ -1,3 +1,5 @@
+import React from "react";
+
 export function PlanCard({ plan }: { plan: { scene?: string; action?: string; riskNotes?: string[] } }) {
   return (
     <article className="planCard">

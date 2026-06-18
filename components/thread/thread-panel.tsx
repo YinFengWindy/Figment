@@ -1,3 +1,4 @@
+import React from "react";
 import { CommandComposer } from "@/components/thread/command-composer";
 import { PlanCard } from "@/components/thread/plan-card";
 

@@ -1,3 +1,5 @@
+import React from "react";
+
 type LibraryPanelProps = {
   items: Array<{ id: string; title: string; type: string }>;
 };

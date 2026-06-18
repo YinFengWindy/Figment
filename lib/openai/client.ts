@@ -1,12 +1,14 @@
 import OpenAI from "openai";
 import { env } from "@/lib/env";
 
-export const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY
-});
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: env.OPENAI_API_KEY
+  });
+}
 
 export async function createPlanSummary(prompt: string) {
-  const response = await openai.responses.create({
+  const response = await getOpenAIClient().responses.create({
     model: env.OPENAI_TEXT_MODEL,
     input: `Summarize this image generation request into a concise execution prompt:\n${prompt}`
   });
@@ -18,7 +20,7 @@ export async function createPlanSummary(prompt: string) {
 }
 
 export async function generateImage(prompt: string) {
-  const image = await openai.images.generate({
+  const image = await getOpenAIClient().images.generate({
     model: env.OPENAI_IMAGE_MODEL,
     prompt,
     size: "1024x1024"

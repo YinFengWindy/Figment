@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { createImageDerivatives } from "@/lib/assets/image-pipeline";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -11,7 +12,7 @@ type ExecuteDeps = {
 async function persistResult(input: {
   roomId: string;
   prompt: string;
-  plan: Record<string, unknown>;
+  plan: Prisma.InputJsonValue;
   output: { bytes: Buffer; mediaType: string };
   model: string;
 }) {
@@ -81,7 +82,7 @@ export async function executeGeneration(
   input: {
     roomId: string;
     prompt: string;
-    plan: Record<string, unknown>;
+    plan: Prisma.InputJsonValue;
   }
 ) {
   const summary = await deps.createPlanSummary(input.prompt);
