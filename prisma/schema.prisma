@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LibraryItemType {
+  character
+  image
+  style
+  scene
+  generation
+}
+
+enum CanvasEdgeRelation {
+  baseline
+  reference
+  edit_from
+  variant_of
+  rejected
+}
+
+enum CanvasEdgeSource {
+  auto
+  manual
+}
+
+enum ThreadRole {
+  user
+  assistant
+  system
+}
+
+enum GenerationRunStatus {
+  pending
+  planned
+  needs_confirmation
+  running
+  succeeded
+  failed
+}
+
+model Room {
+  id           String          @id @default(cuid())
+  name         String
+  settingsJson Json
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  libraryItems LibraryItem[]
+  assets       Asset[]
+  canvasNodes  CanvasNode[]
+  canvasEdges  CanvasEdge[]
+  thread       ThreadMessage[]
+  runs         GenerationRun[]
+}
+
+model LibraryItem {
+  id           String           @id @default(cuid())
+  roomId       String
+  type         LibraryItemType
+  title        String
+  description  String?
+  metadataJson Json
+  coverAssetId String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  room         Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model Asset {
+  id         String   @id @default(cuid())
+  roomId     String
+  kind       String
+  filePath   String
+  publicUrl  String
+  mediaType  String
+  width      Int
+  height     Int
+  checksum   String
+  createdAt  DateTime @default(now())
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model CanvasNode {
+  id        String      @id @default(cuid())
+  roomId    String
+  itemId    String
+  x         Float
+  y         Float
+  width     Float
+  height    Float
+  zIndex    Int         @default(0)
+  collapsed Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  room      Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model CanvasEdge {
+  id         String             @id @default(cuid())
+  roomId     String
+  fromNodeId String
+  toNodeId   String
+  relation   CanvasEdgeRelation
+  source     CanvasEdgeSource
+  createdAt  DateTime           @default(now())
+  room       Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model ThreadMessage {
+  id                     String      @id @default(cuid())
+  roomId                 String
+  role                   ThreadRole
+  content                String
+  mentionedItemIdsJson   Json
+  selectedNodeIdsJson    Json
+  linkedGenerationItemId String?
+  createdAt              DateTime    @default(now())
+  room                   Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model GenerationRun {
+  id                String              @id @default(cuid())
+  roomId            String
+  triggerMessageId  String?
+  planJson          Json
+  prompt            String
+  inputItemIdsJson  Json
+  outputAssetId     String?
+  outputItemId      String?
+  status            GenerationRunStatus
+  errorMessage      String?
+  modelSnapshotJson Json
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  room              Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
