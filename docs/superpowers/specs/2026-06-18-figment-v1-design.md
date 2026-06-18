@@ -1,50 +1,50 @@
-# Figment V1 Design
+# Figment V1 设计文档
 
-## Summary
+## 概要
 
-Figment is an independent desktop image-creation agent for character-driven visual work. V1 focuses on a canvas-based ensemble room where users import or create visual materials, reference characters with `@mentions`, generate images with GPT Image 2, and see generation lineage directly on the canvas.
+Figment 是一个独立的桌面端图片创作 Agent，面向以角色为核心的视觉创作。V1 聚焦“画布式群像创作房间”：用户可以导入或创建视觉素材，通过 `@引用` 使用角色和素材，调用 GPT Image 2 生成图片，并在画布上直接看到生成结果与参考来源之间的关系。
 
-V1 is not TuanChat, a multi-model platform, or a ComfyUI/NovelAI workbench. TuanChat's role module and NovelAiAgent's workflow documents are references for product shape and agent flow only.
+V1 不是 TuanChat，不是多模型平台，也不是 ComfyUI / NovelAI 工作台。TuanChat 的角色模块和 NovelAiAgent 的 PRD 文档只作为产品形态与 Agent 工作流参考。
 
-## Product Positioning
+## 产品定位
 
-Figment V1 is a GPT image creation agent for multi-character visual brainstorming.
+Figment V1 是一个基于 GPT 的多角色图片创作 Agent。
 
-The core experience is:
+核心体验是：
 
-1. The user creates a canvas room.
-2. The user imports characters, images, scenes, style references, or notes into the room library.
-3. Imported character standees or reference images can appear on the canvas.
-4. The user writes instructions in the right-side conversation panel and references room materials with `@mentions`.
-5. GPT-5.x turns the instruction, mentioned items, selected canvas nodes, and room context into a generation plan.
-6. GPT Image 2 generates or edits the image.
-7. The output appears as a new canvas node and is automatically connected to its referenced inputs.
+1. 用户创建一个画布房间。
+2. 用户向房间素材库导入角色、图片、场景、风格参考或文本设定。
+3. 导入的角色立绘或参考图可以显示在画布上。
+4. 用户在右侧对话面板输入创作需求，并用 `@引用` 指定房间里的素材。
+5. GPT-5.x 将用户指令、被引用素材、当前选中的画布节点和房间上下文整理成生成计划。
+6. GPT Image 2 执行图片生成或图片编辑。
+7. 输出结果作为新的画布节点出现，并自动连接到它参考过的输入节点。
 
-The guiding principle is:
+核心原则：
 
 ```text
-The canvas is memory.
-Edges are creative lineage.
-The conversation is the command surface.
+画布就是记忆。
+关系线就是创作脉络。
+对话是驱动画布的命令入口。
 ```
 
-## Non-Goals
+## 非目标
 
-V1 does not include:
+V1 不做：
 
-- ComfyUI execution.
-- NovelAI execution.
-- LoRA, sampler, workflow, or tag-prompt controls.
-- TuanChat data synchronization.
-- A separate project layer above rooms.
-- A separate generation-history list outside the canvas.
-- Full multi-room worldbuilding or project management.
+- ComfyUI 执行。
+- NovelAI 执行。
+- LoRA、采样器、workflow、tag prompt 控制。
+- TuanChat 数据同步。
+- 房间之上的 Project 项目层。
+- 独立于画布之外的生成历史列表。
+- 完整的多房间世界观或项目管理系统。
 
-Future adapters can be added later, but V1 should not expose multi-backend complexity.
+后续可以增加更多后端适配器，但 V1 不暴露多后端复杂度。
 
-## Core Product Model
+## 核心产品模型
 
-The top-level object is `CanvasRoom`.
+顶层对象是 `CanvasRoom`。
 
 ```text
 CanvasRoom = Library + Canvas + Thread
@@ -52,9 +52,9 @@ CanvasRoom = Library + Canvas + Thread
 
 ### CanvasRoom
 
-A `CanvasRoom` is one independent creative room. It owns all data needed for a creation session.
+`CanvasRoom` 是一个独立创作房间。它拥有一次创作会话所需的全部数据。
 
-Suggested fields:
+建议字段：
 
 ```text
 CanvasRoom
@@ -65,11 +65,11 @@ CanvasRoom
   updatedAt
 ```
 
-Room settings include default generation preferences, OpenAI model configuration references, default canvas behavior, and optional room-level visual style guidance.
+房间设置包含默认生成偏好、OpenAI 模型配置引用、默认画布行为，以及可选的房间级视觉风格指导。
 
 ### LibraryItem
 
-The room has one unified library. Characters are not stored in a separate role library; they are one type of library item.
+房间只有一个统一素材库。角色不再放在独立角色库里，而是素材库的一种类型。
 
 ```text
 LibraryItem
@@ -84,7 +84,7 @@ LibraryItem
   updatedAt
 ```
 
-V1 item types:
+V1 素材类型：
 
 ```text
 character
@@ -97,9 +97,9 @@ generation
 
 #### character
 
-Character items represent reusable visual identities.
+`character` 表示可复用的角色视觉身份。
 
-Character metadata should support:
+角色元数据应支持：
 
 ```text
 name
@@ -110,13 +110,13 @@ mainReferenceAssetId
 notes
 ```
 
-Characters can be created from text, imported images, or both. A reference image is useful but not required.
+角色可以从文本创建，也可以从导入图片创建，或者两者结合。参考图很有用，但不是创建角色的必要条件。
 
 #### image
 
-Image items represent imported reference images, sketches, screenshots, backgrounds, standees, and other image assets.
+`image` 表示导入的参考图、草图、截图、背景图、立绘和其他图片资产。
 
-Image metadata should support:
+图片元数据应支持：
 
 ```text
 filePath
@@ -126,21 +126,21 @@ notes
 
 #### style
 
-Style items represent visual direction, such as cel animation, thick paint, cinematic lighting, or concept-art mood.
+`style` 表示视觉方向，例如赛璐璐、厚涂、电影感光影、概念设定稿氛围等。
 
 #### scene
 
-Scene items represent reusable locations or environment concepts.
+`scene` 表示可复用的地点或环境概念。
 
 #### note
 
-Note items represent freeform text, relationship notes, worldbuilding details, constraints, or reminders.
+`note` 表示自由文本设定，例如角色关系、世界观、禁改项或提醒。
 
 #### generation
 
-Generation items are generated outputs. Generation history lives on the canvas as generation nodes, not as a separate list.
+`generation` 表示生成结果。生成历史存在于画布上的 generation 节点中，而不是单独列表。
 
-Generation metadata should support:
+生成结果元数据应支持：
 
 ```text
 plan
@@ -154,7 +154,7 @@ modelSnapshot
 
 ### Asset
 
-Physical files are stored as assets and referenced by library items.
+实际文件作为 `Asset` 存储，并被素材库条目引用。
 
 ```text
 Asset
@@ -168,11 +168,11 @@ Asset
   createdAt
 ```
 
-V1 stores files locally. SQLite stores metadata; the filesystem stores original and generated media.
+V1 使用本地文件存储媒体文件。SQLite 存元数据，文件系统存原始图片和生成图片。
 
 ### CanvasNode
 
-Every visible object on the canvas is a node that references a library item.
+画布上每个可见对象都是一个节点，节点引用一个素材库条目。
 
 ```text
 CanvasNode
@@ -189,11 +189,11 @@ CanvasNode
   updatedAt
 ```
 
-Imported characters and images can be placed on the canvas. Generated results are always placed on the canvas as `generation` nodes.
+导入的角色和图片可以放到画布上。生成结果必须作为 `generation` 节点出现在画布上。
 
 ### CanvasEdge
 
-Edges describe creative relationships between nodes.
+关系线描述节点之间的创作关系。
 
 ```text
 CanvasEdge
@@ -205,7 +205,7 @@ CanvasEdge
   createdAt
 ```
 
-V1 relation types:
+V1 关系类型：
 
 ```text
 baseline
@@ -215,11 +215,11 @@ variant_of
 rejected
 ```
 
-The system creates edges automatically after generation. Users can later adjust or delete them.
+系统会在生成完成后自动创建关系线。用户后续可以调整或删除这些关系线。
 
 ### Thread
 
-The right-side conversation is the room command thread.
+右侧对话是房间的命令线程。
 
 ```text
 ThreadMessage
@@ -233,50 +233,50 @@ ThreadMessage
   createdAt
 ```
 
-The thread is not the primary history view. It records instructions, decisions, and agent explanations. The canvas remains the primary creative memory.
+对话不是主要历史视图。它记录用户指令、Agent 决策和说明。画布才是主要创作记忆。
 
-## Interaction Model
+## 交互模型
 
-### Main Layout
+### 主布局
 
-V1 uses three major regions:
+V1 使用三栏结构：
 
 ```text
-Left: Unified library
-Center: Canvas
-Right: Conversation and generation control
+左侧：统一素材库
+中间：画布
+右侧：对话与生成控制
 ```
 
-The left library lets users import or create characters, images, styles, scenes, and notes. The center canvas shows source materials, generated images, and lineage edges. The right panel is where users issue natural-language commands.
+左侧素材库用于导入或创建角色、图片、风格、场景和设定。中间画布展示源素材、生成图片和关系线。右侧面板用于输入自然语言指令。
 
-### @Mention Flow
+### @引用流程
 
-Users reference room materials with `@mentions`.
+用户通过 `@引用` 使用房间素材。
 
-Example:
+示例：
 
 ```text
 @菲比 @啾比 让她们在夜晚便利店门口吵架，横版电影感
 ```
 
-The system resolves context in priority order:
+系统按以下优先级解析上下文：
 
 ```text
-Explicit @mentions > selected canvas nodes > room context
+明确 @引用 > 当前选中的画布节点 > 房间上下文
 ```
 
-Rules:
+规则：
 
-- Explicit `@mentions` are binding. The agent must not silently swap referenced characters.
-- Selected canvas nodes add extra references.
-- Room context is only fallback context, such as recent results, nearby nodes, and default style preferences.
-- If the referenced item is ambiguous, the agent asks for clarification before generation.
+- 明确 `@引用` 具有绑定效力。Agent 不能偷偷替换被引用角色。
+- 当前选中的画布节点会作为额外参考。
+- 房间上下文只作为兜底，例如最近生成结果、附近节点和默认风格偏好。
+- 如果被引用素材存在歧义，Agent 必须先澄清再生成。
 
-### Generation Planning
+### 生成计划
 
-GPT-5.x creates a structured `GenerationPlan` before calling GPT Image 2.
+GPT-5.x 在调用 GPT Image 2 前生成结构化 `GenerationPlan`。
 
-Suggested shape:
+建议结构：
 
 ```text
 GenerationPlan
@@ -291,139 +291,139 @@ GenerationPlan
   riskNotes
 ```
 
-For simple low-risk requests, the plan can remain compact and run directly. For complex, ambiguous, expensive, or baseline-changing actions, the UI should show a plan card before execution.
+简单、低风险请求可以用紧凑计划直接执行。复杂、有歧义、成本较高或会改变基线的操作，应先在 UI 中展示生成计划卡。
 
-### Generation Result Placement
+### 生成结果落位
 
-After generation succeeds:
+生成成功后，系统执行：
 
-1. Save the output file as an `Asset`.
-2. Create `LibraryItem(type = generation)`.
-3. Create a `CanvasNode` for the generation item.
-4. Place it near referenced inputs or near the current viewport focus.
-5. Create edges from referenced nodes to the generated node.
-6. Add an assistant message summarizing what was used and what was produced.
+1. 将输出文件保存为 `Asset`。
+2. 创建 `LibraryItem(type = generation)`。
+3. 为生成结果创建 `CanvasNode`。
+4. 将节点放在参考输入附近，或当前视野焦点附近。
+5. 从参考节点自动连线到生成节点。
+6. 在右侧对话中补充一条 assistant 消息，说明使用了哪些素材、生成了什么。
 
-Generation history is therefore visible as canvas lineage.
+因此，生成历史以画布关系脉络的方式存在。
 
-## Agent Workflow
+## Agent 工作流
 
-Figment borrows the high-level lifecycle from AkashicAgent and the business workflow shape from NovelAiAgent.
+Figment 借鉴 AkashicAgent 的生命周期骨架，以及 NovelAiAgent 的业务工作流形态。
 
-### Lifecycle
+### 生命周期
 
 ```text
 BeforeTurn
-  Load room, library items, selected canvas nodes, recent thread messages, and relevant canvas lineage.
+  读取房间、素材库、当前选中的画布节点、近期对话消息和相关画布关系。
 
 BeforeReasoning
-  Prepare model context, available tools, generation constraints, and referenced assets.
+  准备模型上下文、可用工具、生成约束和被引用资产。
 
 Reasoner
-  Interpret user intent, resolve @mentions, build generation plan, call GPT Image 2 when ready, and optionally evaluate results.
+  理解用户意图，解析 @引用，构建生成计划，在条件满足时调用 GPT Image 2，并可选进行结果评估。
 
 AfterReasoning
-  Normalize plan, tool results, output assets, edges, and assistant summary.
+  规范化计划、工具结果、输出资产、关系线和 assistant 摘要。
 
 AfterTurn
-  Persist assets, library items, canvas nodes, edges, thread messages, and feedback hooks.
+  持久化资产、素材库条目、画布节点、关系线、对话消息和反馈入口。
 ```
 
-### Business Flow
+### 业务流程
 
-V1's default business flow:
+V1 默认业务流程：
 
 ```text
-Intent Recognition
-  Understand requested image operation and referenced materials.
+意图识别
+  理解用户请求的图片操作和被引用素材。
 
-Generation Planning
-  Build a model-neutral but GPT Image 2-ready plan.
+生成规划
+  构建模型中立但可落到 GPT Image 2 的生成计划。
 
-Generation Execution
-  Call GPT Image 2 with text and image references.
+生成执行
+  使用文本和图片参考调用 GPT Image 2。
 
-Result Registration
-  Store the output as a generation item and canvas node.
+结果登记
+  将输出保存为 generation 素材和画布节点。
 
-Result Summary
-  Explain source relationships and suggested next actions.
+结果总结
+  说明来源关系，并给出下一步建议。
 ```
 
-Automatic retry is not required for V1. The system can suggest fixes and let the user ask for another pass.
+V1 不要求自动重试。系统可以提出修正建议，由用户决定是否继续生成下一版。
 
-## Storage
+## 存储
 
-Use `SQLite + local asset folders` for V1.
+V1 使用 `SQLite + 本地素材文件夹`。
 
-SQLite stores:
+SQLite 存储：
 
-- Rooms.
-- Library item metadata.
-- Assets metadata.
-- Canvas nodes.
-- Canvas edges.
-- Thread messages.
-- Generation plans and results.
+- 房间。
+- 素材库条目元数据。
+- 资产元数据。
+- 画布节点。
+- 画布关系线。
+- 对话消息。
+- 生成计划和生成结果。
 
-The filesystem stores:
+文件系统存储：
 
-- Imported source files.
-- Cropped or normalized references if needed.
-- Generated output images.
-- Thumbnails and previews.
+- 导入的源文件。
+- 必要时裁剪或标准化后的参考图。
+- 生成输出图。
+- 缩略图和预览图。
 
-Markdown export is optional and not part of the core V1 storage model.
+Markdown 导出是可选能力，不属于 V1 核心存储模型。
 
-## OpenAI Model Roles
+## OpenAI 模型分工
 
-V1 uses OpenAI models only:
+V1 只使用 OpenAI 模型：
 
-- GPT-5.x: natural-language understanding, character analysis, generation planning, plan summaries, and result summaries.
-- GPT Image 2: image generation and image editing.
+- GPT-5.x：自然语言理解、角色分析、生成规划、计划摘要和结果总结。
+- GPT Image 2：图片生成和图片编辑。
 
-Implementation must verify the current OpenAI image API fields against official OpenAI docs before coding API calls.
+实现 API 调用前，必须基于 OpenAI 官方文档确认当前图像 API 字段与参数。
 
-## Design References
+## 设计参考
 
-TuanChat role module is used as a conceptual reference:
+TuanChat 角色模块作为概念参考：
 
-- `UserRole` inspires character identity and description.
-- `RoleAvatar` inspires source image, sprite, avatar, and reference asset separation.
-- `RoleAbility.act` inspires structured visual profile fields.
+- `UserRole` 启发角色身份和描述。
+- `RoleAvatar` 启发源图、立绘、头像和参考资产的分层。
+- `RoleAbility.act` 启发结构化视觉档案字段。
 
-NovelAiAgent PRDs are used as workflow references:
+NovelAiAgent PRD 作为工作流参考：
 
-- Intent recognition.
-- Generation planning.
-- Generation execution.
-- Result evaluation or summary.
-- Retry as future optional behavior.
+- 意图识别。
+- 生成规划。
+- 生成执行。
+- 结果评估或总结。
+- 重试作为未来可选能力。
 
-AkashicAgent is used as an architecture reference:
+AkashicAgent 作为架构参考：
 
-- Turn lifecycle.
-- Tool registry.
-- Context preparation.
-- Memory and thread separation.
-- Plugin-ready extension points.
+- Turn 生命周期。
+- 工具注册。
+- 上下文准备。
+- 记忆和对话分层。
+- 插件化扩展点。
 
-## V1 Success Criteria
+## V1 成功标准
 
-V1 is successful when a user can:
+V1 达成目标时，用户应该可以：
 
-1. Create a canvas room.
-2. Add at least two character items to the unified library.
-3. Place character reference nodes on the canvas.
-4. Use the right-side conversation to `@mention` characters and request an image.
-5. Generate an image through GPT Image 2.
-6. See the result appear on the canvas as a generation node.
-7. See automatic edges from referenced materials to the generated result.
-8. Continue from a generated node by selecting it or referencing it in conversation.
+1. 创建一个画布房间。
+2. 向统一素材库添加至少两个角色素材。
+3. 将角色参考节点放到画布上。
+4. 在右侧对话中 `@引用` 角色并请求生成图片。
+5. 通过 GPT Image 2 生成图片。
+6. 在画布上看到生成结果节点。
+7. 看到系统自动从参考素材连线到生成结果。
+8. 选中或引用生成结果，继续进行下一步创作。
 
-## Open Questions
+## 待确认问题
 
-- Whether generation plan cards are always shown or only shown for complex requests.
-- Whether V1 supports manual edge creation or only automatic edges.
-- Whether character creation from text should use a required visual-profile confirmation step.
-- Whether imported images should have optional crop/role-extraction flows in V1 or later.
+- 生成计划卡是始终展示，还是只在复杂请求时展示。
+- V1 是否支持手动创建关系线，还是只支持自动关系线。
+- 纯文本创建角色时，是否需要强制确认视觉档案。
+- 导入图片后，V1 是否需要支持裁剪或角色抽取流程，还是放到后续版本。
