@@ -4,11 +4,9 @@
 
 Figment 是一个独立的桌面端图片创作 Agent，面向以角色为核心的视觉创作。V1 聚焦“画布式群像创作房间”：用户可以导入或创建视觉素材，通过 `@引用` 使用角色和素材，调用 GPT Image 2 生成图片，并在画布上直接看到生成结果与参考来源之间的关系。
 
-V1 不是 TuanChat，不是多模型平台，也不是 ComfyUI / NovelAI 工作台。TuanChat 的角色模块和 NovelAiAgent 的 PRD 文档只作为产品形态与 Agent 工作流参考。
-
 ## 产品定位
 
-Figment V1 是一个基于 GPT 的多角色图片创作 Agent。
+Figment是一个基于 GPT 的多角色图片创作 Agent。
 
 核心体验是：
 
@@ -91,7 +89,6 @@ character
 image
 style
 scene
-note
 generation
 ```
 
@@ -131,10 +128,6 @@ notes
 #### scene
 
 `scene` 表示可复用的地点或环境概念。
-
-#### note
-
-`note` 表示自由文本设定，例如角色关系、世界观、禁改项或提醒。
 
 #### generation
 
